@@ -1,9 +1,9 @@
 const path = require("path");
 const express = require("express");
-const dotenv = require("dotenv");
 
-dotenv.config();
-
+// Directly set the environment variables
+process.env.NODE_ENV = "production";
+process.env.PORT = 5000;
 
 global.foodData = require("./db")(function call(err, data, CatData) {
   if (err) console.log(err);
@@ -12,9 +12,9 @@ global.foodData = require("./db")(function call(err, data, CatData) {
 });
 
 const app = express();
-const port = 5000;
+const port = process.env.PORT || 5000; // Use environment variable for port if available
 
-
+// CORS setup
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
   res.header(
@@ -24,18 +24,18 @@ app.use((req, res, next) => {
   next();
 });
 
+// Middleware for JSON parsing
 app.use(express.json());
 
-
+// API Routes
 app.use("/api/auth", require("./Routes/Auth"));
 app.use("/api", require("./Routes/CreateUser"));
 app.use("/api", require("./Routes/DisplayData"));
 
 //-----------------Deployment------------------
 const __dirname1 = path.resolve();
-const NODE_ENV = process.env.NODE_ENV;
 
-if (NODE_ENV === "production") {
+if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname1, "/build")));
 
   app.get("*", (req, res) => {
@@ -47,7 +47,6 @@ if (NODE_ENV === "production") {
   });
 }
 
-
 app.listen(port, () => {
-  console.log(`Example app listening on http://localhost:${port}`);
+  console.log(`App listening on http://localhost:${port}`);
 });
